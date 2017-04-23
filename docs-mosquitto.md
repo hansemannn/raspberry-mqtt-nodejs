@@ -15,6 +15,7 @@ sudo apt-get install -y mosquitto mosquitto-clients
 ```bash
 mosquitto_sub -h localhost -v -t lights
 ```
+Der Port kann über `-p` geändert werden. Der Default-Port ist 1883.
 
 #### MGTT-Channel testen, indem als Publisher agiert wird
 ```bash
