@@ -27,7 +27,7 @@ Falls eine Authorisierung verwendet wird, müssen die Parameter `--username` und
 
 #### Mosquitto als Daemon starten (optional mit `-p` für den Port)
 ```bash
-mosquitto --d
+mosquitto -d
 ```
 
 #### Aktuell verbundene Clients ausgeben
