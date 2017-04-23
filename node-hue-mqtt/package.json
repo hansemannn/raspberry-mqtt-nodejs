@@ -1,0 +1,24 @@
+{
+  "name": "node-hue-mqtt",
+  "version": "1.0.0",
+  "description": "Use MQTT to control Philips Hue lights.",
+  "main": "index.js",
+  "dependencies": {
+    "mqtt": "^2.6.2"
+  },
+  "devDependencies": {
+      "mqtt": "^2.6.2",
+      "node-hue-api": "^2.4.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "hue",
+    "mqtt",
+    "mosquitto"
+  ],
+  "author": "Hans Knöchel",
+  "license": "MIT"
+}
