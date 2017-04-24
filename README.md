@@ -12,6 +12,7 @@ ist Teil des IoT-Seminars im Somersemester 2017 an der Hochschule Osnabrück.
 - Hans Knöchel
 - Timo Mittendorf
 - Timo Eggengoor
+- Katrin Junker
 
 ## Lizenz
 MIT
