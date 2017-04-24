@@ -24,7 +24,7 @@ mosquitto_pub -h localhost -t lights/toggle -m "\{\"state\": \"on\"\}"\
 ```
 Lichtfarbe ändern:
 ```bash
-mosquitto_pub -h localhost -t lights/toggle -m "\{\"lightID\": 1, \"color\": [255,0,255]\}"\
+mosquitto_pub -h localhost -t lights/color -m "\{\"lightID\": 1, \"color\": [255,0,255]\}"\
 ```
 
 Falls eine Authorisierung verwendet wird, müssen die Parameter `--username` und `--pw` übergeben wird.
