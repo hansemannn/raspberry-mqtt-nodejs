@@ -1,36 +1,54 @@
 "use strict";
 
+/**
+ * Require Node.js API's
+ */
 const mqtt = require('mqtt');
 const hue = require("node-hue-api");
 const chalk = require('chalk');
 const topics = require('./topics')
-const activeTopics = generateActiveTopics();
+const Table = require('cli-table');
 
 /**
  * Configure MQTT
  */
 const client = mqtt.connect('mqtt://localhost');
+const activeTopics = generateActiveTopics();
 
 /**
  * Configure Hue API
  */
 const HueApi = hue.HueApi;
 const lightState = hue.lightState;
-const host = '192.168.178.26'; // Can vary
+const host = '192.168.1.116'; // Can vary
 const name = 'NodeAPI';
-var username = 'ifcHnVHvgOcHjfBQZZxMonBXb7a3cR9p8P8rizwQ'; // Must currently be set before starting the API. Future versions of the API should manage this through the /config channel 
+var username = '5eWzrk9IBXFfjRvDzDKSkC7goLY2Glj6sr3IUK8Y'; // Must currently be set before starting the API. Future versions of the API should manage this through the /config channel 
 var state = lightState.create();
 const api = new HueApi(host, username);
 const HUE_LOG = chalk.white.bgMagenta('[HUE]')
 
+/**
+ * Handle a new broker-connection, display Hue config-information
+ * @param _ The callback invoked when receiving the connection.
+ */
 client.on('connect', function() {  
   console.log('\nClient connected! Subscribing to ' + formattedTopics() + ' ...');
   client.subscribe(activeTopics);
   
-  // # Uncomment to display Hue device infos on initial connection
-  // api.config().then(function(e) {
-  //   console.log(JSON.stringify(e, null, 2));
-  // }).done();
+  /**
+   * Display Hue device-infos
+   */
+  api.config().then(function(result) {
+    var table = new Table({
+      head: ['Hue Bridge-IP', '# Users'], 
+      colWidths: [30, 10]
+    });
+      
+    // console.log(JSON.stringify(result, null, 2));
+
+    table.push([result.ipaddress, Object.keys(result.whitelist).length]);  
+    console.log(table.toString());
+  }).done();
 
   // # Uncomment to publish a color-message to the lights/color topic
   // client.publish('lights/color', '{"deviceID": "1", "color": [255, 0, 255], "state": "on"}');
@@ -39,6 +57,12 @@ client.on('connect', function() {
   // client.publish('lights/toggle', '{"on": true}');
 });
 
+/**
+ * Receive incoming MQTT messages.
+ * @param _ The callback invoked when receiving the connection.
+ *   @param topic The topic belonging to the message.
+ *   @param message The message belonging to the topic.
+ */
 client.on('message', function(topic, message) {
   console.log(chalk.gray('\nNew Message:'));
   console.log('-> ' + chalk.yellow(message.toString()) + '\n');
@@ -48,6 +72,11 @@ client.on('message', function(topic, message) {
   // client.end();
 });
 
+/**
+ * Handle incoming MQTT messages.
+ * @param topic The topic belonging to the message.
+ * @param message The message belonging to the topic.
+ */
 function handleMessage(topic, message) {
   var topicPaths = topic.split('/')
 
@@ -103,8 +132,7 @@ function handleMessage(topic, message) {
           try {
             const parsedMessage = JSON.parse(message);
 
-            if (parsedMessage.color !== null && Array.isArray(parsedMessage.color) && parsedMessage.color.length === 3) {
-              
+            if (parsedMessage.color !== null && Array.isArray(parsedMessage.color) && parsedMessage.color.length === 3) {  
               const color = parsedMessage.color;
               const lightID = parsedMessage.lightID;
                             
