@@ -97,7 +97,7 @@ function handleMessage(topic, message) {
             const parsedMessage = JSON.parse(message);
 
             if (parsedMessage.on == null || typeof parsedMessage.on !== 'boolean') {
-              return console.log('Invalid toggle format, needs to be {"on": true|false}.');
+              return console.log(chalk.bgRed('Invalid toggle format, needs to be {"on": true|false}.'));
             }
             
             const on = parsedMessage.on;
@@ -120,7 +120,7 @@ function handleMessage(topic, message) {
             }
 
           } catch (e) {
-            return console.log('Error toggling light: ' + e);
+            return console.log(chalk.bgRed('Error toggling light: ' + e));
           }
           break;
         }
@@ -142,13 +142,13 @@ function handleMessage(topic, message) {
                 api.setLightState(lightID, state).done();
                 console.log(HUE_LOG + ' Color set to ' + chalk.green('{' + parsedMessage.color.join(', ') + '}'));
               } else {
-                console.log('Cannot set a RGB color to a specific light. Specify the "lightID" instead.')
+                console.log(chalk.bgRed('Cannot set a RGB color to a specific light. Specify the "lightID" instead.'))
               }              
             } else {
-              return console.log('Invalid color format, needs to be {color: [r, g, b]}.');
+              return console.log(chalk.bgRed('Invalid color format, needs to be {color: [r, g, b]}.'));
             }
           } catch (e) {
-            return console.log('Error changing light color: ' + e);
+            return console.log(chalk.bgRed('Error changing light color: ' + e));
           }
 
           break;
@@ -158,7 +158,7 @@ function handleMessage(topic, message) {
         }
       }
       break;
-  }
+    }
     case 'config': {
       if (topicPaths.length < 2 || !topics.config.topics[topicPaths[1]]) {
         return console.log('Trying to handle /lights without valid sub-topic. ');
