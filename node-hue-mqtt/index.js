@@ -16,21 +16,26 @@ const client = mqtt.connect('mqtt://localhost');
  */
 const HueApi = hue.HueApi;
 const lightState = hue.lightState;
-const host = '192.168.2.129';
-const name = 'Node API';
-var username = '<username>'; // Must currently be set before starting the API. Future versions of the API should manage this through the /config channel 
+const host = '192.168.178.26'; // Can vary
+const name = 'NodeAPI';
+var username = 'ifcHnVHvgOcHjfBQZZxMonBXb7a3cR9p8P8rizwQ'; // Must currently be set before starting the API. Future versions of the API should manage this through the /config channel 
 var state = lightState.create();
 const api = new HueApi(host, username);
 const HUE_LOG = chalk.white.bgMagenta('[HUE]')
 
 client.on('connect', function() {  
-  console.log('\nClient connected! Subscribing to ' + chalk.green(activeTopics.join(', ')) + ' ...');
+  console.log('\nClient connected! Subscribing to ' + formattedTopics() + ' ...');
   client.subscribe(activeTopics);
+  
+  // # Uncomment to display Hue device infos on initial connection
+  // api.config().then(function(e) {
+  //   console.log(JSON.stringify(e, null, 2));
+  // }).done();
 
-  // Uncomment to publish a color-message to the lights/color topic
+  // # Uncomment to publish a color-message to the lights/color topic
   // client.publish('lights/color', '{"deviceID": "1", "color": [255, 0, 255], "state": "on"}');
 
-  // Uncomment to publish a toggle-message to the lights/toggle topic
+  // # Uncomment to publish a toggle-message to the lights/toggle topic
   // client.publish('lights/toggle', '{"on": true}');
 });
 
@@ -65,16 +70,28 @@ function handleMessage(topic, message) {
             if (parsedMessage.on == null || typeof parsedMessage.on !== 'boolean') {
               return console.log('Invalid toggle format, needs to be {"on": true|false}.');
             }
+            
+            const on = parsedMessage.on;
+            const lightID = parsedMessage.lightID;
 
+            // Set light state
             if (parsedMessage.on === true) {
+              state = state.reset().on()
               console.log(HUE_LOG + ' Light state changed to ' + chalk.green('{ON}'));
-              state = state.on();
             } else {
+              state = state.reset().off()
               console.log(HUE_LOG + ' Light state changed to ' + chalk.green('{OFF}'));
-              state = state.off();
             }
+
+            // Turn on/off one of the lights, or all if {lightID} not specified
+            if (lightID) {
+              api.setLightState(lightID, state).done();
+            } else {
+              api.setGroupLightState(0, state).done();
+            }
+
           } catch (e) {
-            return console.log('Cannot parse message to valid JSON: ' + message);
+            return console.log('Error toggling light: ' + e);
           }
           break;
         }
@@ -87,17 +104,23 @@ function handleMessage(topic, message) {
             const parsedMessage = JSON.parse(message);
 
             if (parsedMessage.color !== null && Array.isArray(parsedMessage.color) && parsedMessage.color.length === 3) {
-              const r = parsedMessage.color[0],
-                    g = parsedMessage.color[1],
-                    b = parsedMessage.color[2];
-
-              state = state.on().rgb(r, g, b).shortAlert();
-              console.log(HUE_LOG + ' Color set to ' + chalk.green('{' + parsedMessage.color.join(', ') + '}'));
+              
+              const color = parsedMessage.color;
+              const lightID = parsedMessage.lightID;
+                            
+              state = state.reset().on().rgb(color[0], color[1], color[2])
+              
+              if (lightID) {
+                api.setLightState(lightID, state).done();
+                console.log(HUE_LOG + ' Color set to ' + chalk.green('{' + parsedMessage.color.join(', ') + '}'));
+              } else {
+                console.log('Cannot set a RGB color to a specific light. Specify the "lightID" instead.')
+              }              
             } else {
               return console.log('Invalid color format, needs to be {color: [r, g, b]}.');
             }
           } catch (e) {
-            return console.log('Cannot parse message to valid JSON: ' + message);
+            return console.log('Error changing light color: ' + e);
           }
 
           break;
@@ -182,4 +205,20 @@ function generateActiveTopics() {
     
   // Flatten the array to one dimension
   return [].concat.apply([], result);
+}
+
+function formattedTopics() {
+  var arr = [];
+  
+  for (var i = 0; i < activeTopics.length; i++) {
+    if (i < activeTopics.length - 2) {
+      arr.push(chalk.green(activeTopics[i]) + ', ');      
+    } else if (i === activeTopics.length - 2) {
+      arr.push(chalk.green(activeTopics[i]));      
+    } else {
+      arr.push(' and ' + chalk.green(activeTopics[i]));      
+    }
+  }
+  
+  return arr.join('');
 }
