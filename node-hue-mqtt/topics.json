@@ -1,0 +1,24 @@
+{
+	"lights": {
+		"topics": {
+			"toggle": {
+				"topics": {},
+				"active": true 
+			},
+			"color": {
+				"topics": {},
+				"active": true 
+			}
+		},
+		"active": true 
+	},
+	"config": {
+		"topics": {
+			"adduser": {
+				"topics": {},
+				"active": true 
+			}
+		},
+		"active": false
+	}
+}
