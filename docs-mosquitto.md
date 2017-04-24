@@ -18,9 +18,15 @@ mosquitto_sub -h localhost -v -t lights
 Der Port kann über `-p` geändert werden. Der Default-Port ist 1883.
 
 #### MGTT-Channel testen, indem als Publisher agiert wird
+Licht an/aus:
 ```bash
-mosquitto_pub -h localhost -t lights -m "\{\"colorID\": \"1\", \"color\": [255, 0, 255], \"state\": \"on\"\}"\
+mosquitto_pub -h localhost -t lights/toggle -m "\{\"state\": \"on\"\}"\
 ```
+Lichtfarbe ändern:
+```bash
+mosquitto_pub -h localhost -t lights/toggle -m "\{\"lightID\": 1, \"color\": [255,0,255]\}"\
+```
+
 Falls eine Authorisierung verwendet wird, müssen die Parameter `--username` und `--pw` übergeben wird.
 
 ### Optionale Befehle
